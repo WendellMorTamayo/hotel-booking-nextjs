@@ -1,7 +1,11 @@
 import ListingCard from "@/components/ListingCard";
 import { NoItems } from "@/components/NoItem";
+import { Separator } from "@/components/ui/separator";
+import { CategoryShowcase } from "@/components/CategoryShowcase";
+import { categoryItems } from "@/lib/categoryItems";
 import React from "react";
 
+const categories = categoryItems;
 const data = [
   {
     imagePath: "/assets/images/shangarh.webp",
@@ -71,6 +75,11 @@ const data = [
 export default function Home() {
   return (
     <section className="wrapper mx-auto px-5 lg:px-10">
+      <Separator className="my-7" />
+
+      <CategoryShowcase categoryItems={categories} />
+
+      <Separator className="my-7" />
       {data.length > 0 ? (
         <div className="grid lg:grid-cols-4 sm:grid-cols-2 md:grid-cols-3 gap-8 my-2">
           {data.map((item, index) => (
