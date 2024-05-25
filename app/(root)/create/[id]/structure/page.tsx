@@ -1,6 +1,7 @@
 
 import { CreationBottomBar } from "@/components/CreationBottomBar";
 import SelectCategory from "@/components/SelectedCategory";
+import { createCategoryPage } from "@/lib/actions";
 
 export default function StructureRoute({ params }: { params: { id: string } }) {
   return (
@@ -11,8 +12,8 @@ export default function StructureRoute({ params }: { params: { id: string } }) {
         </h2>
       </div>
 
-      <form>
-        <input type="hidden" name="homeId" value={params.id} />
+      <form action={createCategoryPage}>
+        <input type="hidden" name="hotelId" value={params.id} />
         <SelectCategory />
         <CreationBottomBar />
       </form>

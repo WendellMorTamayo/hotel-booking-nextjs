@@ -1,3 +1,6 @@
+"use client";
+
+import { signIn, signOut, useSession } from "next-auth/react";
 import ListingCard from "@/components/ListingCard";
 import { NoItems } from "@/components/NoItem";
 import { Separator } from "@/components/ui/separator";
@@ -73,9 +76,11 @@ const data = [
 ];
 
 export default function Home() {
+  const { data: session } = useSession();
+  console.log({ session });
+  
   return (
     <section className="wrapper mx-auto px-5 lg:px-10">
-      <Separator className="my-7" />
 
       <CategoryShowcase categoryItems={categories} />
 

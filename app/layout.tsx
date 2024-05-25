@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Provider from "./Provider";
+import { Toaster } from "sonner";
+
+
+
 
 export const metadata: Metadata = {
   title: "VibesRa",
@@ -14,7 +19,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Provider>{children}</Provider>
+        <Toaster richColors />
+      </body>
     </html>
   );
 }

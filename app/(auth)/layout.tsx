@@ -8,7 +8,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div
       className={
-        "flex justify-center mt-40 h-screen w-full bg-primary-50 bg-dotted-pattern bg-cover bg-fixed bg-center"
+        "flex justify-center mt-40 h-auto w-full bg-primary-50 bg-dotted-pattern bg-cover bg-fixed bg-center"
       }
     >
       <div className="flex flex-col gap-2">

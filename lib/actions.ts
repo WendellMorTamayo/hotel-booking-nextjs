@@ -2,52 +2,83 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import path from "path";
+import axios from "axios";
+import { HotelRoomRequestDTO } from "@/app/(root)/create/types";
+import { NextResponse } from "next/server";
+import { useRouter } from "next/navigation";
 
-export async function createAirbnbHome({ userId }: { userId: string }) {
-  //   const data = await home.findFirst({
-  //     where: {
-  //       userId: userId,
-  //     },
-  //     orderBy: {
-  //       createdAT: "desc",
-  //     },
-  //   });
-  const data = null; // TODO: Remove this line when the above code is uncommented
+export async function createHotelRoom(userId: number, session: any) {
+    console.log("Creating hotel room for user:", session?.user.access_token);
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/hotel/latest`,
+      {
+        params: {
+          id: userId,
+        },
+        headers: {
+          Authorization: `Bearer ${session?.user.access_token}`,
+        },
+      }
+    );
+    const result = res.data;
+    console.log("Data from createHotelRoom:", result);
+    if (result === null) {
+      const { data: newHotel } = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/hotel/create`,
+        {
+          userId: userId,
+          hotelRoom: {},
+        },
+      );
+      return redirect(`/create/${newHotel.hotelId}/structure`);
+    } else if (
+      !result.addedCategory &&
+      !result.addedDescription &&
+      !result.addedLoaction
+    ) {
+      return redirect(`/create/${result.hotelId}/structure`);
+    } else if (result.addedCategory && !result.addedDescription) {
+      return redirect(`/create/${result.hotelId}/description`);
+    } else if (
+      result.addedCategory &&
+      result.addedDescription &&
+      !result.addedLoaction
+    ) {
+      return redirect(`/create/${result.hotelId}/address`);
+    } else if (
+      result.addedCategory &&
+      result.addedDescription &&
+      result.addedLoaction
+    ) {
 
-  if (data === null) {
-    // const data = await home.create({
-    //   data: {
-    //     userId: userId,
-    //   },
-    // });
+      const { data: newHotel } = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/hotel/create`,
+        {
+          userId,
+          hotelRoom: {},
+        }
+      );
+      return redirect(`/create/${newHotel.hotelId}/structure`);
+    }
+}
 
-    return redirect(`/create/${data.id}/structure`);
-  } else if (
-    !data.addedCategory &&
-    !data.addedDescription &&
-    !data.addedLoaction
-  ) {
-    return redirect(`/create/${data.id}/structure`);
-  } else if (data.addedCategory && !data.addedDescription) {
-    return redirect(`/create/${data.id}/description`);
-  } else if (
-    data.addedCategory &&
-    data.addedDescription &&
-    !data.addedLoaction
-  ) {
-    return redirect(`/create/${data.id}/address`);
-  } else if (
-    data.addedCategory &&
-    data.addedDescription &&
-    data.addedLoaction
-  ) {
-    // const data = await home.create({
-    //   data: {
-    //     userId: userId,
-    //   },
-    // });
 
-    return redirect(`/create/${data.id}/structure`);
-  }
+export async function createCategoryPage(formData: FormData) {
+  const categoryName = formData.get("categoryName") as string;
+  const hotelId = formData.get("hotelId") as string;
+  const res: any = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/hotel/${Number(hotelId)}`,
+  );
+  console.log("Hotel data from createCategoryPage:", res.data.userId);
+  const data = res.data;
+  await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/hotel/update`, {
+    userId: data.userId,
+    hotelRoom: {
+      hotelId: hotelId,
+      addedCategory: true,
+      type: categoryName,
+      userId: data.userId,
+    },
+  });
+  return redirect(`/create/${hotelId}/description`);
 }

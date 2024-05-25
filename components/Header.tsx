@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import React from "react";
-import { Button } from "./ui/button";
-import { UserNav } from "./auth/UserNav";
+import { UserNav } from "../app/(auth)/UserNav";
 import { SearchModalComponent } from "./SearchComponent";
 
 function Header() {
   return (
-    <header className="border border-b-1 border-gray-200">
+    <header className="flex border border-b-1 border-gray-200">
       <nav
         className="flex container mx-auto max-w-7xl items-center justify-between p-4 lg:px-8"
         aria-label="Global"
@@ -20,7 +19,7 @@ function Header() {
             viewBox="0 0 24 24"
             strokeWidth="1.5"
             stroke="currentColor"
-            className="w-8 h-8 rotate-90 text-primary"
+            className="w-8 h-8 rotate-90 text-primary hidden lg:block"
           >
             <path
               strokeLinecap="round"
@@ -29,7 +28,9 @@ function Header() {
             />
           </svg>
 
-          <span className="font-bold text-primary">VibesRa</span>
+          <span className="font-bold text-primary hidden lg:block">
+            VibesRa
+          </span>
         </Link>
         <SearchModalComponent />
         <UserNav />
