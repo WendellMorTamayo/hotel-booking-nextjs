@@ -1,7 +1,7 @@
 "use client";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
-import { useRef, useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,43 +12,54 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { AlertDestructive } from "@/components/AlertDestructive";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+
+const SignInSchema = z.object({
+  username: z.string().min(1, { message: "Username is required" }),
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters" })
+    .max(100, { message: "Password must be at most 100 characters" }),
+});
 
 export default function Page() {
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const { data: session } = useSession();
   const router = useRouter();
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(SignInSchema),
+  });
 
-  const usernameRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
+  if (session) {
+    router.push("/");
+    return null;
+  }
 
-  useEffect(() => {
-    if (usernameRef.current && passwordRef.current) {
-      setUsername(usernameRef.current.value);
-      setPassword(passwordRef.current.value);
-    }
-  }, []);
-
-  const onSubmit = async () => {
+  const onSubmit = async (data: z.infer<typeof SignInSchema>) => {
     const result = await signIn("credentials", {
-      username: username,
-      password: password,
+      username: data.username,
+      password: data.password,
       redirect: false,
     });
     if (result?.error) {
-      console.error("Error during sign in:", result.error);
       setError("Incorrect username or password. Please try again.");
     } else {
+      router.push("/");
       toast.success("Successfully logged in", {
         duration: 3000,
         description: "You have been successfully signed in",
-        position: "top-center"
-      })
-      router.push("/");
+        position: "top-center",
+      });
     }
   };
 
@@ -61,18 +72,21 @@ export default function Page() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="username">Username</Label>
             <Input
               id="username"
               type="text"
               placeholder="jsmith"
-              ref={usernameRef}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              {...register("username")}
               required
             />
+            {errors.username && (
+              <p className="text-red-500">
+                {errors.username.message as string}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <div className="flex items-center">
@@ -84,19 +98,26 @@ export default function Page() {
             <Input
               id="password"
               type="password"
-              ref={passwordRef}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              {...register("password")}
               required
             />
+            {errors.password && (
+              <p className="text-red-500">
+                {errors.password.message as string}
+              </p>
+            )}
           </div>
           <span className="">
-            {error ? <AlertDestructive error={error} /> : ""}
+            {error ? (
+              <AlertDestructive title={"Invalid credentials"} error={error} />
+            ) : (
+              ""
+            )}
           </span>
-          <Button type="submit" className="w-full" onClick={onSubmit}>
+          <Button type="submit" className="w-full">
             Login
           </Button>
-        </div>
+        </form>
         <div className="mt-4 text-center text-sm">
           Don&apos;t have an account?{" "}
           <Link href="/signup" className="underline">
@@ -105,19 +126,5 @@ export default function Page() {
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-import { AlertCircle } from "lucide-react";
-
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
-export function AlertDestructive({ error }: { error: string }) {
-  return (
-    <Alert variant="destructive">
-      <AlertCircle className="h-4 w-4" />
-      <AlertTitle>Invalid Credentials</AlertTitle>
-      <AlertDescription>{error}</AlertDescription>
-    </Alert>
   );
 }

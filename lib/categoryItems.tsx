@@ -6,6 +6,51 @@ export interface iAppProps {
   id: number;
 }
 
+export const categoryItemsOpt: iAppProps[] = [
+  {
+    name: "all",
+    title: "All",
+    imageUrl: "/images/all.svg",
+    description: "All items",
+    id: 1,
+  },
+  {
+    name: "house",
+    title: "House",
+    imageUrl: "/images/house.svg",
+    description: "House items",
+    id: 2,
+  },
+  {
+    name: "apartment",
+    title: "Apartment",
+    imageUrl: "/images/apartment.svg",
+    description: "Apartment items",
+    id: 3,
+  },
+  {
+    name: "hotel",
+    title: "Hotel",
+    imageUrl: "/images/hotel.svg",
+    description: "Hotel items",
+    id: 4,
+  },
+  {
+    name: "resort",
+    title: "Resort",
+    imageUrl: "/images/resort.svg",
+    description: "Resort items",
+    id: 5,
+  },
+  {
+    name: "villa",
+    title: "Villa",
+    imageUrl: "/images/villa.svg",
+    description: "Villa items",
+    id: 6,
+  },
+];
+
 export const categoryItems: iAppProps[] = [
   {
     id: 0,

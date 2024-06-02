@@ -1,37 +1,21 @@
-import NextAuth, { DefaultSession } from "next-auth";
+import { DefaultSession } from "next-auth";
 
 declare module "next-auth" {
   interface Session {
     user: {
+      id: string;
+      email: string;
+      username: string;
       access_token: string;
-      userId: number;
-      user: {
-        email: string;
-        favorites: Array[];
-        firstname: string;
-        hotelRooms: Array[];
-        id: number;
-        lastname: string;
-        password: string;
-        role: string;
-        username: string;
-      };
+      firstName: string;
+      lastName: string;
     } & DefaultSession["user"];
   }
 
   interface User {
+    id: string;
+    email: string;
+    username: string;
     access_token: string;
-    userId: number;
-    user: {
-      email: string;
-      favorites: Array[];
-      firstname: string;
-      hotelRooms: Array[];
-      id: number;
-      lastname: string;
-      password: string;
-      role: string;
-      username: string;
-    };
   }
 }

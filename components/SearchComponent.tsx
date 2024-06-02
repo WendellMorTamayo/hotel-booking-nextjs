@@ -22,8 +22,8 @@ import { useState } from "react";
 import { CreationSubmit } from "./SubmitButton";
 import { HomeMap } from "./HomeMap";
 import { Card, CardHeader } from "@/components/ui/card";
-import { Counter } from "./Counter";
 import { useCountries } from "../lib/getCountries";
+import { SearchCounter } from "@/components/SearchCounter";
 
 export function SearchModalComponent() {
   const [step, setStep] = useState(1);
@@ -74,46 +74,44 @@ export function SearchModalComponent() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <form className="gap-4 flex flex-col">
-          <input type="hidden" name="country" value={locationValue} />
+          <input type="hidden" name="location" value={locationValue} />
           {step === 1 ? (
             <>
               <DialogHeader>
                 <DialogTitle>Select a Country</DialogTitle>
                 <DialogDescription>
-                  Pleae Choose a Country, so that what you want
+                  Please Choose a Country, so that what you want
                 </DialogDescription>
+                <Select
+                  required
+                  onValueChange={(value) => setLocationValue(value)}
+                  value={locationValue}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a Country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Countries</SelectLabel>
+                      {getAllCountries().map((item) => (
+                        <SelectItem key={item.value} value={item.value}>
+                          {item.flag} {item.label} / {item.region}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <HomeMap locationValue={locationValue} />
               </DialogHeader>
-
-              <Select
-                required
-                onValueChange={(value) => setLocationValue(value)}
-                value={locationValue}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a Country" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Countries</SelectLabel>
-                    {getAllCountries().map((item) => (
-                      <SelectItem key={item.value} value={item.value}>
-                        {item.flag} {item.label} / {item.region}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <HomeMap locationValue={locationValue} />
             </>
           ) : (
             <>
               <DialogHeader>
                 <DialogTitle>Select all the info you need</DialogTitle>
                 <DialogDescription>
-                  Pleae Choose a Country, so that what you want
+                  Please Choose a Country, so that what you want
                 </DialogDescription>
               </DialogHeader>
-
               <Card>
                 <CardHeader className="flex flex-col gap-y-5">
                   <div className="flex items-center justify-between">
@@ -124,7 +122,7 @@ export function SearchModalComponent() {
                       </p>
                     </div>
 
-                    <Counter name="guest" />
+                    <SearchCounter name="guest" />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col">
@@ -134,7 +132,7 @@ export function SearchModalComponent() {
                       </p>
                     </div>
 
-                    <Counter name="room" />
+                    <SearchCounter name="room" />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col">
@@ -144,7 +142,7 @@ export function SearchModalComponent() {
                       </p>
                     </div>
 
-                    <Counter name="bathroom" />
+                    <SearchCounter name="bathroom" />
                   </div>
                 </CardHeader>
               </Card>

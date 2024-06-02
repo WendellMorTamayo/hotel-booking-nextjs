@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function Homepageloading() {
+export default function SkeletonLoading() {
   return (
     <div className="w-[75%] mx-auto mt-10">
       <Skeleton className="h-4 w-1/3" />

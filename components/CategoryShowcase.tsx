@@ -1,33 +1,22 @@
 import Image from "next/image";
-import { categoryItems, iAppProps } from "../lib/categoryItems";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { categoryItems } from "../lib/categoryItems";
 
-export function CategoryShowcase({
-  categoryItems,
-}: {
-  categoryItems: iAppProps[];
-}) {
-  // const category = categoryItems.find((item) => item.name === categoryName);
+export function CategoryShowcase({ categoryName }: { categoryName: string }) {
+  const category = categoryItems.find((item) => item.name === categoryName);
 
   return (
-    <ScrollArea className="flex-col container whitespace-nowrap rounded-md border-none m-o items-center justify-center">
-      <div className="flex">
-        {categoryItems.map((item) => (
-          <div
-            key={item.id}
-            className="flex w-max space-x-4 p-4 items-center justify-center"
-          >
-            <Image
-              src={item?.imageUrl}
-              alt="Category image"
-              width={44}
-              height={44}
-            />
-            <h3 className="font-medium">{item?.title}</h3>
-          </div>
-        ))}
+    <div className="flex items-center">
+      <Image
+        src={category?.imageUrl as string}
+        alt="Caegory image"
+        width={44}
+        height={44}
+      />
+
+      <div className="flex flex-col ml-4">
+        <h3 className="font-medium">{category?.title}</h3>
+        <p className="text-sm text-muted-foreground">{category?.description}</p>
       </div>
-      <ScrollBar orientation="horizontal" />
-    </ScrollArea>
+    </div>
   );
 }

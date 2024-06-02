@@ -12,30 +12,50 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RegisterProps, registerUser } from "../action";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { AlertDestructive } from "@/components/AlertDestructive";
+import { useSession } from "next-auth/react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+
+const SignUpSchema = z.object({
+  username: z.string().min(1, { message: "Username is required" }),
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters" })
+    .max(100, { message: "Password must be at most 100 characters" }),
+  email: z.string().email({ message: "Invalid email address" }),
+  firstname: z.string().min(1, { message: "First name is required" }),
+  lastname: z.string().min(1, { message: "Last name is required" }),
+});
 
 export default function Page() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
+  const { data: session } = useSession();
+  const [error, setError] = useState(null);
   const router = useRouter();
 
-  const usernameRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
-  const emailRef = useRef<HTMLInputElement>(null);
-  const firstNameRef = useRef<HTMLInputElement>(null);
-  const lastNameRef = useRef<HTMLInputElement>(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(SignUpSchema),
+  });
 
-  const handleRegister = async () => {
+  if (session) {
+    redirect("/");
+    return null;
+  }
+
+  const handleRegister = async (data: any) => {
     const user: RegisterProps = {
-      username,
-      email,
-      password,
-      firstname: firstName,
-      lastname: lastName,
+      username: data.username,
+      email: data.email,
+      password: data.password,
+      firstname: data.firstname,
+      lastname: data.lastname,
     };
 
     try {
@@ -45,6 +65,14 @@ export default function Page() {
         toast.success("Successfully registered", {
           duration: 3000,
           description: "You have been successfully registered",
+        });
+      } else {
+        toast.error("Registration failed", {
+          duration: 3000,
+          description: "Failed to register user",
+        });
+        setError((err) => {
+          throw err;
         });
       }
     } catch (error) {
@@ -56,23 +84,6 @@ export default function Page() {
     }
   };
 
-  useEffect(() => {
-    if (
-      usernameRef.current &&
-      passwordRef.current &&
-      usernameRef.current &&
-      emailRef.current &&
-      firstNameRef.current &&
-      lastNameRef.current
-    ) {
-      setUsername(usernameRef.current.value);
-      setPassword(passwordRef.current.value);
-      setEmail(usernameRef.current.value);
-      setFirstName(usernameRef.current.value);
-      setLastName(usernameRef.current.value);
-    }
-  }, []);
-
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
@@ -82,29 +93,33 @@ export default function Page() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4">
+        <form onSubmit={handleSubmit(handleRegister)} className="grid gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="first-name">First name</Label>
+              <Label htmlFor="firstname">First name</Label>
               <Input
-                id="first-name"
+                id="firstname"
                 placeholder="Max"
-                required
-                ref={firstNameRef}
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                {...register("firstname")}
               />
+              {errors.firstname && (
+                <p className="text-red-500">
+                  {errors.firstname.message as string}
+                </p>
+              )}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="last-name">Last name</Label>
+              <Label htmlFor="lastname">Last name</Label>
               <Input
-                id="last-name"
+                id="lastname"
                 placeholder="Robinson"
-                required
-                ref={lastNameRef}
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                {...register("lastname")}
               />
+              {errors.lastname && (
+                <p className="text-red-500">
+                  {errors.lastname.message as string}
+                </p>
+              )}
             </div>
           </div>
           <div className="grid gap-2">
@@ -113,41 +128,49 @@ export default function Page() {
               id="email"
               type="email"
               placeholder="m@example.com"
-              required
-              ref={emailRef}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email")}
             />
+            {errors.email && (
+              <p className="text-red-500">{errors.email.message as string}</p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="username">Username</Label>
             <Input
               id="username"
-              type="username"
+              type="text"
               placeholder="johnsmith"
-              required
-              ref={usernameRef}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              {...register("username")}
             />
+            {errors.username && (
+              <p className="text-red-500">
+                {errors.username.message as string}
+              </p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              ref={passwordRef}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <Input id="password" type="password" {...register("password")} />
+            {errors.password && (
+              <p className="text-red-500">
+                {errors.password.message as string}
+              </p>
+            )}
           </div>
-          <Button type="submit" className="w-full" onClick={handleRegister}>
+          <span className="">
+            {error ? (
+              <AlertDestructive title={"Something went wrong!"} error={error} />
+            ) : (
+              ""
+            )}
+          </span>
+          <Button type="submit" className="w-full">
             Create an account
           </Button>
           <Button variant="outline" className="w-full">
             Sign up with Google
           </Button>
-        </div>
+        </form>
         <div className="mt-4 text-center text-sm">
           Already have an account?{" "}
           <Link href="/signin" className="underline">

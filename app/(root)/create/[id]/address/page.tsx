@@ -1,6 +1,4 @@
 "use client";
-
-// import { createLocation } from "@/app/actions";
 import { CreationBottomBar } from "@/components/CreationBottomBar";
 import { useCountries } from "@/lib/getCountries";
 import {
@@ -15,10 +13,19 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { createLocation } from "@/lib/actions";
 
-export default function AddressRoutw({ params }: { params: { id: string } }) {
+export default function AddressRoute({ params }: { params: { id: string } }) {
   const { getAllCountries } = useCountries();
   const [locationValue, setLocationValue] = useState("");
+  const { data: session } = useSession({
+    required: true,
+    onUnauthenticated() {
+      return redirect("/signin");
+    },
+  });
 
   const LazyMap = dynamic(() => import("@/components/Map"), {
     ssr: false,
@@ -32,9 +39,11 @@ export default function AddressRoutw({ params }: { params: { id: string } }) {
         </h2>
       </div>
 
-      <form action={"createLocation"}>
-        <input type="hidden" name="homeId" value={params.id} />
+      <form action={createLocation}>
+        <input type="hidden" name="hotelId" value={params.id} />
         <input type="hidden" name="countryValue" value={locationValue} />
+        <input type="hidden" name="userId" value={session?.user.id} />
+
         <div className="w-3/5 mx-auto mb-36">
           <div className="mb-5">
             <Select required onValueChange={(value) => setLocationValue(value)}>

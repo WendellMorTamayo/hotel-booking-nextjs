@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-no-comment-textnodes */
-
-import { signIn, signOut, useSession } from "next-auth/react";
+"use client";
+import { signOut, useSession } from "next-auth/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,15 +12,17 @@ import { LogOut, MenuIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import axios from "axios";
-import { HotelRoomDTO, HotelRoomRequestDTO } from "../(root)/create/types";
 import { useState } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { toast } from "sonner";
 import { createHotelRoom } from "@/lib/actions";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export function UserNav() {
   const [isLoading, setIsLoading] = useState(false);
   const { data: session } = useSession();
+  const router = useRouter();
   console.log("The session:: ", { session });
 
   const handleLogout = async () => {
@@ -33,6 +35,7 @@ export function UserNav() {
           accessToken: accessToken,
         });
         await signOut({ callbackUrl: "/", redirect: false });
+        router.push("/");
         toast.warning("Successfully logged out", {
           duration: 3000,
           description: "You have been successfully signed out",
@@ -48,68 +51,13 @@ export function UserNav() {
 
   const handleCreate = async () => {
     setIsLoading(true);
+    console.log("The::", session?.user.id);
     try {
-        const userId = session?.user.user.id;
-      const res = await createHotelRoom(userId as number, session);
+      const userId = session?.user.id as string;
+      await createHotelRoom(userId, session);
     } catch (error) {
       console.error("Error creating hotel room:", error);
     } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const createHotelRoomWithId = async () => {
-    setIsLoading(true);
-    if (session) {
-      // const hotelRoom: HotelRoomDTO = {
-      //   roomImages: [
-      //     "https://a0.muscache.com/im/pictures/miso/Hosting-22774851/original/7789a5cc-f7cb-4238-ad5d-f1d71e36365c.jpeg?im_w=1200",
-      //     "https://a0.muscache.com/im/pictures/miso/Hosting-22774851/original/69ce39d3-c285-494a-a0a4-36834c5642fc.jpeg?im_w=1200",
-      //     "https://a0.muscache.com/im/pictures/miso/Hosting-22774851/original/8dcd8fb9-14f5-4e30-93e5-704cdbad8c9d.jpeg?im_w=720",
-      //   ],
-      //   name: "Hotel Room",
-      //   location: "New York",
-      //   description: "A beautiful hotel room in New York",
-      //   contact: "1234567890",
-      //   email: "contact@mail.com",
-      //   specialNote: "No smoking",
-      //   price: 100,
-      //   isBooked: false,
-      //   type: "Single",
-      //   dimension: "10x10",
-      //   numberOfBeds: 1,
-      //   offeredAmenities: [
-      //     { amenity: "TV", icon: "tv" },
-      //     { amenity: "AC", icon: "ac" },
-      //     { amenity: "Wifi", icon: "wifi" },
-      //   ],
-      //   slug: "hotel-room",
-      //   coverImage:
-      //     "https://a0.muscache.com/im/pictures/miso/Hosting-22774851/original/7789a5cc-f7cb-4238-ad5d-f1d71e36365c.jpeg?im_w=1200",
-      // };
-
-      // const requestDTO: HotelRoomRequestDTO = {
-      //   userId: session.user.user.id,
-      //   {},
-      // };
-      // console.log("Request:: ", requestDTO);
-      try {
-        const res = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/hotel/create`,
-          {
-            userId: session.user.user.id,
-            hotelRoom: {},
-          }
-        );
-      } catch (error) {
-        console.error("Error creating hotel room:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      await signIn("credentials", {
-        redirect: false,
-      });
       setIsLoading(false);
     }
   };
@@ -142,13 +90,13 @@ export function UserNav() {
           <>
             <DropdownMenuItem>
               <form action={handleCreate} className="w-full">
-                <button type="submit" className="w-full">
-                  Airbnb your Home
-                </button>
+                <Button type="submit" className="w-full">
+                  Create Listing
+                </Button>
               </form>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href="/my-homes" className="w-full">
+              <Link href="/my-listings" className="w-full">
                 My Listings
               </Link>
             </DropdownMenuItem>
@@ -158,7 +106,7 @@ export function UserNav() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Link href="/reservations" className="w-full">
+              <Link href="/bookings" className="w-full">
                 My Bookings
               </Link>
             </DropdownMenuItem>

@@ -1,9 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import axios from "axios";
+import { revalidatePath } from "next/cache";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   if (req.method === "POST") {
     const { accessToken } = req.body;
@@ -15,7 +16,7 @@ export default async function handler(
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
-        }
+        },
       );
       console.log("response:: " + response.status);
       if (response.status === 200) {

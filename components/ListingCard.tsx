@@ -1,63 +1,126 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useCountries } from "../lib/getCountries";
-import { formatPrice } from "@/lib/utils";
-import { AddToFavoriteButton } from "./SubmitButton";
+import { AddToFavoriteButton, DeleteFromFavoriteButton } from "./SubmitButton";
+import { addToFavorite, DeleteFromFavorite } from "@/lib/actions";
+import CustomBtn from "@/components/CustomBtn";
+import React, { useCallback } from "react";
 
 interface iAppProps {
-  imagePath: string;
-  description: string;
-  location: string;
-  price: number;
+  imagePath?: string;
+  description?: string;
+  location?: string;
+  price?: number;
+  userId?: string | undefined;
+  isFavoriteByUser?: boolean;
+  favoriteId?: string;
+  hotelId?: string;
+  pathName?: string;
+  ownerId?: string;
+  onAction?: (id: string) => void;
+  disabled?: boolean;
+  actionLabel?: string;
+  actionId?: string;
+  currentUser?: any;
 }
 
-function ListingCard({ imagePath, description, location, price }: iAppProps) {
+function ListingCard({
+  description,
+  imagePath,
+  location,
+  price,
+  userId,
+  hotelId,
+  favoriteId,
+  isFavoriteByUser,
+  pathName,
+  ownerId,
+  onAction,
+  disabled,
+  actionLabel,
+  actionId,
+}: iAppProps) {
   const { getCountryByValue } = useCountries();
-  const country = getCountryByValue(location);
+  const country = getCountryByValue(location as string);
+
+  const handleCancel = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+
+      if (disabled) {
+        return;
+      }
+
+      onAction?.(actionId as string);
+    },
+    [disabled, onAction, actionId],
+  );
   return (
     <>
-      <div className="flex-col flex">
-        <div className="flex flex-col relative h-72">
-          <Image
-            src={imagePath}
-            alt={"Image of a house"}
-            fill
-            className="rounded-lg h-full object-cover mb-3"
-          />
-          <div className="z-10 absolute top-2 right-2">
-            <AddToFavoriteButton />
+      <div className="flex flex-col col-span-1 cursor-pointer group">
+        <div className="relative h-72">
+          <div
+            className="
+            aspect-square
+            w-full
+            relative
+            overflow-hidden
+            rounded-xl
+          "
+          >
+            <Image
+              src={imagePath as string}
+              alt="Image of House"
+              fill
+              className="object-cover
+              h-full
+              w-full
+              group-hover:scale-110
+              transition"
+            />
           </div>
-        </div>
-        <Link href="/" className="mt-2">
-          <div className="flex-between">
-            <p className="font-semibold">{location}</p>
-            <div className="flex flex-row justify-center items-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                className="w-4 h-4"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401Z"
-                  clipRule="evenodd"
-                />
-              </svg>
-
-              <span className="text-black">5.0</span>
+          {userId !== ownerId && userId && (
+            <div className="z-10 absolute top-2 right-2">
+              {isFavoriteByUser ? (
+                <form action={DeleteFromFavorite}>
+                  <input type="hidden" name="favoriteId" value={favoriteId} />
+                  <input type="hidden" name="userId" value={userId} />
+                  <input type="hidden" name="pathName" value={pathName} />
+                  <DeleteFromFavoriteButton />
+                </form>
+              ) : (
+                <form action={addToFavorite}>
+                  <input type="hidden" name="hotelId" value={hotelId} />
+                  <input type="hidden" name="userId" value={userId} />
+                  <input type="hidden" name="pathName" value={pathName} />
+                  <AddToFavoriteButton />
+                </form>
+              )}
             </div>
-          </div>
+          )}
+        </div>
+
+        <Link href={`/hotel/${hotelId}`} className="mt-2">
+          <h3 className="font-medium text-base">
+            {country?.flag} {country?.label} / {country?.region}
+          </h3>
           <p className="text-muted-foreground text-sm line-clamp-2">
             {description}
           </p>
           <p className="pt-2 text-muted-foreground">
-            <span className="font-semibold text-black">
-              ₱{formatPrice(price)}
-            </span>{" "}
-            Night
+            <span className="font-medium text-black">₱ {price}</span> Night
           </p>
         </Link>
+        {onAction && actionLabel && (
+          <CustomBtn
+            disabled={disabled}
+            small
+            label={actionLabel}
+            onClick={handleCancel}
+          />
+        )}
       </div>
     </>
   );
