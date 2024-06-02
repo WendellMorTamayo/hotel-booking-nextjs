@@ -45,7 +45,7 @@ export default function Page() {
     return null;
   }
 
-  const onSubmit = async (data: z.infer<typeof SignInSchema>) => {
+  const onSubmit = async (data: any) => {
     const result = await signIn("credentials", {
       username: data.username,
       password: data.password,
